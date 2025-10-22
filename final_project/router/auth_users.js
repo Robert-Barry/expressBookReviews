@@ -54,20 +54,24 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     const isbn = req.params.isbn;
     const review = req.query.review;
     const user = req.session.authorization.username;
-
-    const reviewsLength = books[isbn]["reviews"].length;
+    console.log(user);
     let i = 0;
-    if (reviewsLength > 0) { 
+    if (books[isbn]["reviews"].length > 0) { 
         console.log("GREATER THAN 0"); 
-             
-        for (; i < reviewsLength; i++) {
-            console.log ("i " + i);
+        
+        for (; i < books[isbn]["reviews"].length; i++) {
             if (books[isbn]["reviews"][i].username === user) {
+                console.log("IF")
                 books[isbn]["reviews"][i] = { "username": user, "review": review };
+                console.log("IF 2");
+                return res.status(200).json({ message: `Review added: ${books[isbn]["reviews"][i].username}, ${books[isbn]["reviews"][i].review}` });
+            } else {
+                books[isbn]["reviews"].push({ "username": user, "review": review });
                 return res.status(200).json({ message: `Review added: ${books[isbn]["reviews"][i].username}, ${books[isbn]["reviews"][i].review}` });
             }
         }
     } else {
+        console.log("ELSE");
         books[isbn]["reviews"].push({ "username": user, "review": review });
         return res.status(200).json({ message: `Review added: ${books[isbn]["reviews"][i].username}, ${books[isbn]["reviews"][i].review}` });
     }
