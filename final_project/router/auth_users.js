@@ -58,22 +58,32 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     // Check if there are multiple reviews
     if (books[isbn]["reviews"].length > 0) { 
         // Loop through the reviews looking for the logged in user.
-        // If the user is found, change their review. Else add a new review
+        // If the user is found, change their review.
         for (; i < books[isbn]["reviews"].length; i++) {
-            console.log(user);
-            console.log(books[isbn]["reviews"][i].username);
             if (books[isbn]["reviews"][i].username === user) {
-                console.log("USER FOUND");
                 books[isbn]["reviews"][i] = { "username": user, "review": review };
                 return res.status(200).json({ message: `Review added: ${books[isbn]["reviews"][i].username}, ${books[isbn]["reviews"][i].review}` });
             }
         }
     }
-    console.log("NEW REVIEW")
-    // If there are no reviews yet, add one
+    // Add a new review
     books[isbn]["reviews"].push({ "username": user, "review": review });
     return res.status(200).json({ message: `Review added: ${books[isbn]["reviews"][i].username}, ${books[isbn]["reviews"][i].review}` });
 });
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    const review = req.query.review;
+    const user = req.session.authorization.username;
+    if (books[isbn]["reviews"].length > 0) {
+        let filteredReviews = books[isbn]["reviews"].filter((review) => {
+            return review.username !== user;
+        });
+        books[isbn]["reviews"] = filteredReviews;
+        return res.status(200).json({ message: `Review deleted for ISBN ${isbn}` });
+    }
+});
+
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
